@@ -13,7 +13,10 @@
     "512": "icons/favicon-512x512.png"
   },
   "permissions": ["declarativeNetRequest", "storage"],
-  "host_permissions": ["*://*.npmjs.com/*"],
+  "host_permissions": [
+    "*://npmjs.com/package/*",
+    "*://www.npmjs.com/package/*"
+  ],
   "declarative_net_request": {
     "rule_resources": [
       {

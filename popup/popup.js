@@ -22,14 +22,31 @@ function updateStatus(enabled) {
 }
 
 // Get initial state
-browser.runtime.sendMessage({ type: "getStatus" }).then((response) => {
-  toggleSwitch.checked = response.enabled;
-  updateStatus(response.enabled);
-});
+browser.runtime
+  .sendMessage({ type: "getStatus" })
+  .then((response) => {
+    toggleSwitch.checked = response.enabled;
+    updateStatus(response.enabled);
+  })
+  .catch((error) => {
+    console.error("Failed to get status:", error);
+    toggleSwitch.checked = true;
+    updateStatus(true);
+  });
 
 // Handle toggle changes
 toggleSwitch.addEventListener("change", async () => {
   const enabled = toggleSwitch.checked;
   updateStatus(enabled);
-  await browser.runtime.sendMessage({ type: "toggle", enabled });
+  try {
+    const ok = await browser.runtime.sendMessage({ type: "toggle", enabled });
+    if (!ok) {
+      toggleSwitch.checked = !enabled;
+      updateStatus(!enabled);
+    }
+  } catch (error) {
+    console.error("Failed to toggle redirect:", error);
+    toggleSwitch.checked = !enabled;
+    updateStatus(!enabled);
+  }
 });
