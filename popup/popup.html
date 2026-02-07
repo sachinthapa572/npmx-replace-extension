@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>npmx Redirect</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <main class="shell">
+        <header class="brand">
+            <div class="logo">npmx</div>
+            <div class="meta">Redirector</div>
+        </header>
+
+        <section class="card">
+            <div class="title-row">
+                <h1>npmjs → npmx</h1>
+                <span class="state-badge" id="stateBadge">Active</span>
+            </div>
+            <p class="description">Browse npm packages through a faster, cleaner mirror.</p>
+
+            <label class="toggle">
+                <input type="checkbox" id="enabled" checked>
+                <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+                <span class="label">
+                    <span class="label-title">Redirects</span>
+                    <span class="label-sub">Intercept npmjs.com links</span>
+                </span>
+            </label>
+
+            <div class="status-row" id="statusRow">
+                <span class="status-dot" aria-hidden="true"></span>
+                <p class="status" id="status">Redirects active</p>
+            </div>
+        </section>
+
+        <a href="https://npmx.dev" target="_blank" rel="noreferrer" class="cta">Open npmx.dev</a>
+    </main>
+
+    <script src="../lib/browser-polyfill.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>
