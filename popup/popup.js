@@ -50,3 +50,42 @@ toggleSwitch.addEventListener("change", async () => {
     updateStatus(!enabled);
   }
 });
+
+// Devin Review button handler
+const devinBtn = document.getElementById("openDevinReview");
+const devinStatus = document.getElementById("devinStatus");
+
+devinBtn.addEventListener("click", async () => {
+  try {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    if (!tabs || tabs.length === 0) {
+      devinStatus.textContent = "No active tab found";
+      return;
+    }
+
+    const currentUrl = tabs[0].url;
+
+    // Check if it's a GitHub PR URL
+    const isGithubPr = currentUrl.includes("github.com") && /\/pull\/\d+/.test(currentUrl);
+
+    if (!isGithubPr) {
+      devinStatus.textContent = "Open a GitHub PR first";
+      return;
+    }
+
+    // Transform URL: replace github.com with devinreview.com
+    const newUrl = currentUrl.replace("github.com", "devinreview.com");
+
+    // Open in new tab
+    await browser.tabs.create({ url: newUrl });
+    devinStatus.textContent = "Opened in Devin Review";
+
+    // Clear status after 2 seconds
+    setTimeout(() => {
+      devinStatus.textContent = "";
+    }, 2000);
+  } catch (error) {
+    console.error("Failed to open Devin Review:", error);
+    devinStatus.textContent = "Error opening URL";
+  }
+});
