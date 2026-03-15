@@ -1,12 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "manifest_version": 3,
-  "name": "npmx Redirect",
+  "name": "npmx Redirect + Better Hub",
   "version": "1.0.0",
-  "description": "Redirects npmjs.com package pages to npmx.dev for a better browsing experience",
+  "description": "Redirects npmjs.com package pages to npmx.dev and GitHub pages to Better Hub",
   "icons": {
     "16": "icons/favicon-16x16.png",
     "32": "icons/favicon-32x32.png",
+    "48": "icons/icon-48.png",
     "64": "icons/favicon-64x64.png",
     "128": "icons/favicon-128x128.png",
     "256": "icons/favicon-256x256.png",
@@ -15,14 +16,20 @@
   "permissions": ["declarativeNetRequest", "storage", "tabs"],
   "host_permissions": [
     "*://npmjs.com/package/*",
-    "*://www.npmjs.com/package/*"
+    "*://www.npmjs.com/package/*",
+    "*://github.com/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
       {
-        "id": "ruleset_1",
+        "id": "ruleset_npmx",
         "enabled": true,
-        "path": "rules.json"
+        "path": "rules-npmx.json"
+      },
+      {
+        "id": "ruleset_hub",
+        "enabled": true,
+        "path": "rules-hub.json"
       }
     ]
   },

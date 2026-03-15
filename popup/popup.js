@@ -1,23 +1,44 @@
 // Popup script for npmx Redirect extension
 
-const toggleSwitch = document.getElementById("enabled");
-const statusElement = document.getElementById("status");
-const statusRow = document.getElementById("statusRow");
-const stateBadge = document.getElementById("stateBadge");
+const npmxToggle = document.getElementById("npmxEnabled");
+const npmxStatusElement = document.getElementById("npmxStatus");
+const npmxStatusRow = document.getElementById("npmxStatusRow");
+const npmxStateBadge = document.getElementById("npmxStateBadge");
 
-function updateStatus(enabled) {
+const hubToggle = document.getElementById("hubEnabled");
+const hubStatusElement = document.getElementById("hubStatus");
+const hubStatusRow = document.getElementById("hubStatusRow");
+const hubStateBadge = document.getElementById("hubStateBadge");
+
+function updateNpmxStatus(enabled) {
   if (enabled) {
-    statusElement.textContent = "Redirects active";
-    statusElement.classList.remove("disabled");
-    statusRow.classList.remove("disabled");
-    stateBadge.textContent = "Active";
-    stateBadge.classList.remove("paused");
+    npmxStatusElement.textContent = "Redirects active";
+    npmxStatusElement.classList.remove("disabled");
+    npmxStatusRow.classList.remove("disabled");
+    npmxStateBadge.textContent = "Active";
+    npmxStateBadge.classList.remove("paused");
   } else {
-    statusElement.textContent = "Redirects paused";
-    statusElement.classList.add("disabled");
-    statusRow.classList.add("disabled");
-    stateBadge.textContent = "Paused";
-    stateBadge.classList.add("paused");
+    npmxStatusElement.textContent = "Redirects paused";
+    npmxStatusElement.classList.add("disabled");
+    npmxStatusRow.classList.add("disabled");
+    npmxStateBadge.textContent = "Paused";
+    npmxStateBadge.classList.add("paused");
+  }
+}
+
+function updateHubStatus(enabled) {
+  if (enabled) {
+    hubStatusElement.textContent = "Redirects active";
+    hubStatusElement.classList.remove("disabled");
+    hubStatusRow.classList.remove("disabled");
+    hubStateBadge.textContent = "Active";
+    hubStateBadge.classList.remove("paused");
+  } else {
+    hubStatusElement.textContent = "Redirects paused";
+    hubStatusElement.classList.add("disabled");
+    hubStatusRow.classList.add("disabled");
+    hubStateBadge.textContent = "Paused";
+    hubStateBadge.classList.add("paused");
   }
 }
 
@@ -25,29 +46,50 @@ function updateStatus(enabled) {
 browser.runtime
   .sendMessage({ type: "getStatus" })
   .then((response) => {
-    toggleSwitch.checked = response.enabled;
-    updateStatus(response.enabled);
+    npmxToggle.checked = response.npmxEnabled;
+    hubToggle.checked = response.hubEnabled;
+    updateNpmxStatus(response.npmxEnabled);
+    updateHubStatus(response.hubEnabled);
   })
   .catch((error) => {
     console.error("Failed to get status:", error);
-    toggleSwitch.checked = true;
-    updateStatus(true);
+    npmxToggle.checked = true;
+    hubToggle.checked = true;
+    updateNpmxStatus(true);
+    updateHubStatus(true);
   });
 
-// Handle toggle changes
-toggleSwitch.addEventListener("change", async () => {
-  const enabled = toggleSwitch.checked;
-  updateStatus(enabled);
+// Handle npmx toggle changes
+npmxToggle.addEventListener("change", async () => {
+  const enabled = npmxToggle.checked;
+  updateNpmxStatus(enabled);
   try {
-    const ok = await browser.runtime.sendMessage({ type: "toggle", enabled });
+    const ok = await browser.runtime.sendMessage({ type: "toggleNpmx", enabled });
     if (!ok) {
-      toggleSwitch.checked = !enabled;
-      updateStatus(!enabled);
+      npmxToggle.checked = !enabled;
+      updateNpmxStatus(!enabled);
     }
   } catch (error) {
-    console.error("Failed to toggle redirect:", error);
-    toggleSwitch.checked = !enabled;
-    updateStatus(!enabled);
+    console.error("Failed to toggle npmx redirect:", error);
+    npmxToggle.checked = !enabled;
+    updateNpmxStatus(!enabled);
+  }
+});
+
+// Handle hub toggle changes
+hubToggle.addEventListener("change", async () => {
+  const enabled = hubToggle.checked;
+  updateHubStatus(enabled);
+  try {
+    const ok = await browser.runtime.sendMessage({ type: "toggleHub", enabled });
+    if (!ok) {
+      hubToggle.checked = !enabled;
+      updateHubStatus(!enabled);
+    }
+  } catch (error) {
+    console.error("Failed to toggle hub redirect:", error);
+    hubToggle.checked = !enabled;
+    updateHubStatus(!enabled);
   }
 });
 

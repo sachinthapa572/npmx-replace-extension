@@ -3,7 +3,8 @@
 
 importScripts("lib/browser-polyfill.min.js");
 
-const RULESET_ID = "ruleset_1";
+const RULESET_NPMX = "ruleset_npmx";
+const RULESET_HUB = "ruleset_hub";
 
 const ICONS = {
   16: "icons/favicon-16x16.png",
@@ -23,66 +24,103 @@ const ICONS_DISABLE = {
   512: "icons/favicon-disable-512x512.png",
 };
 
-async function updateIcon(enabled) {
+async function updateIcon(npmxEnabled, hubEnabled) {
+  const enabled = npmxEnabled || hubEnabled;
   const icons = enabled ? ICONS : ICONS_DISABLE;
   await browser.action.setIcon({ path: icons });
 }
 
-async function updateRuleset(enabled) {
-  if (enabled) {
+async function updateRuleset(npmxEnabled, hubEnabled) {
+  if (npmxEnabled) {
     await browser.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds: [RULESET_ID],
+      enableRulesetIds: [RULESET_NPMX],
     });
   } else {
     await browser.declarativeNetRequest.updateEnabledRulesets({
-      disableRulesetIds: [RULESET_ID],
+      disableRulesetIds: [RULESET_NPMX],
+    });
+  }
+
+  if (hubEnabled) {
+    await browser.declarativeNetRequest.updateEnabledRulesets({
+      enableRulesetIds: [RULESET_HUB],
+    });
+  } else {
+    await browser.declarativeNetRequest.updateEnabledRulesets({
+      disableRulesetIds: [RULESET_HUB],
     });
   }
 }
 
-// Toggle the redirect on/off
-async function toggleRedirect(enabled) {
+async function toggleNpmx(enabled) {
   try {
-    await updateRuleset(enabled);
-    await updateIcon(enabled);
-    await browser.storage.local.set({ enabled });
+    await browser.storage.local.set({ npmxEnabled: enabled });
+    await updateRuleset(enabled, await getHubEnabled());
+    await updateIcon(enabled, await getHubEnabled());
     return true;
   } catch (error) {
-    console.error("Failed to toggle redirect:", error);
+    console.error("Failed to toggle npmx redirect:", error);
+    return false;
+  }
+}
+
+async function toggleHub(enabled) {
+  try {
+    await browser.storage.local.set({ hubEnabled: enabled });
+    await updateRuleset(await getNpmxEnabled(), enabled);
+    await updateIcon(await getNpmxEnabled(), enabled);
+    return true;
+  } catch (error) {
+    console.error("Failed to toggle hub redirect:", error);
     return false;
   }
 }
 
 async function syncRulesetFromStorage() {
   try {
-    const enabled = await getEnabled();
-    await updateRuleset(enabled);
-    await updateIcon(enabled);
+    const npmxEnabled = await getNpmxEnabled();
+    const hubEnabled = await getHubEnabled();
+    await updateRuleset(npmxEnabled, hubEnabled);
+    await updateIcon(npmxEnabled, hubEnabled);
   } catch (error) {
     console.error("Failed to sync ruleset state:", error);
   }
 }
 
-// Get current enabled state
-async function getEnabled() {
+async function getNpmxEnabled() {
   try {
-    const result = await browser.storage.local.get("enabled");
-    // Default to enabled if not set
-    return result.enabled !== false;
+    const result = await browser.storage.local.get("npmxEnabled");
+    return result.npmxEnabled !== false;
   } catch (error) {
-    console.error("Failed to get enabled state:", error);
+    console.error("Failed to get npmx enabled state:", error);
+    return true;
+  }
+}
+
+async function getHubEnabled() {
+  try {
+    const result = await browser.storage.local.get("hubEnabled");
+    return result.hubEnabled !== false;
+  } catch (error) {
+    console.error("Failed to get hub enabled state:", error);
     return true;
   }
 }
 
 // Listen for messages from popup
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "toggle") {
-    toggleRedirect(message.enabled).then(sendResponse);
-    return true; // Indicates async response
+  if (message.type === "toggleNpmx") {
+    toggleNpmx(message.enabled).then(sendResponse);
+    return true;
+  }
+  if (message.type === "toggleHub") {
+    toggleHub(message.enabled).then(sendResponse);
+    return true;
   }
   if (message.type === "getStatus") {
-    getEnabled().then((enabled) => sendResponse({ enabled }));
+    Promise.all([getNpmxEnabled(), getHubEnabled()]).then(([npmxEnabled, hubEnabled]) => {
+      sendResponse({ npmxEnabled, hubEnabled });
+    });
     return true;
   }
 });
@@ -90,9 +128,9 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Initialize on install
 browser.runtime.onInstalled.addListener(async (details) => {
   if (details?.reason === "install") {
-    await browser.storage.local.set({ enabled: true });
-    await updateRuleset(true);
-    await updateIcon(true);
+    await browser.storage.local.set({ npmxEnabled: true, hubEnabled: true });
+    await updateRuleset(true, true);
+    await updateIcon(true, true);
     return;
   }
   await syncRulesetFromStorage();
@@ -104,4 +142,6 @@ browser.runtime.onStartup?.addListener(() => {
 });
 
 // Initialize icon on load
-getEnabled().then(updateIcon);
+Promise.all([getNpmxEnabled(), getHubEnabled()]).then(([npmxEnabled, hubEnabled]) => {
+  updateIcon(npmxEnabled, hubEnabled);
+});

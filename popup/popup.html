@@ -15,15 +15,15 @@
             <div class="meta">Redirector</div>
         </header>
 
-<section class="card">
+        <section class="card">
             <div class="title-row">
                 <h1>npmjs → npmx</h1>
-                <span class="state-badge" id="stateBadge">Active</span>
+                <span class="state-badge" id="npmxStateBadge">Active</span>
             </div>
             <p class="description">Browse npm packages through a faster, cleaner mirror.</p>
 
             <label class="toggle">
-                <input type="checkbox" id="enabled" checked>
+                <input type="checkbox" id="npmxEnabled" checked>
                 <span class="track" aria-hidden="true"><span class="thumb"></span></span>
                 <span class="label">
                     <span class="label-title">Redirects</span>
@@ -31,9 +31,31 @@
                 </span>
             </label>
 
-            <div class="status-row" id="statusRow">
+            <div class="status-row" id="npmxStatusRow">
                 <span class="status-dot" aria-hidden="true"></span>
-                <p class="status" id="status">Redirects active</p>
+                <p class="status" id="npmxStatus">Redirects active</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="title-row">
+                <h1>GitHub → Better Hub</h1>
+                <span class="state-badge" id="hubStateBadge">Active</span>
+            </div>
+            <p class="description">Redirect GitHub pages to your Better Hub instance.</p>
+
+            <label class="toggle">
+                <input type="checkbox" id="hubEnabled" checked>
+                <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+                <span class="label">
+                    <span class="label-title">Redirects</span>
+                    <span class="label-sub">Intercept github.com links</span>
+                </span>
+            </label>
+
+            <div class="status-row" id="hubStatusRow">
+                <span class="status-dot" aria-hidden="true"></span>
+                <p class="status" id="hubStatus">Redirects active</p>
             </div>
         </section>
 
